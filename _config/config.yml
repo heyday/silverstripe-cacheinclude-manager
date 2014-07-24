@@ -1,0 +1,20 @@
+---
+Only:
+  environment: live
+---
+Heyday\CacheInclude\Manager:
+  extra_requirements_javascript:
+    silverstripe-cacheinclude-manager/assets/production/js/bundle.js:
+  extra_requirements_css:
+    silverstripe-cacheinclude-manager/assets/production/css/style.min.css:
+      media: screen
+---
+Except:
+  environment: live
+---
+Heyday\CacheInclude\Manager:
+  extra_requirements_javascript:
+    silverstripe-cacheinclude-manager/assets/source/js/app.js:
+  extra_requirements_css:
+    silverstripe-cacheinclude-manager/assets/source/css/style.css:
+      media: screen
