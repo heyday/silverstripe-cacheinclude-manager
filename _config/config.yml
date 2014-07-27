@@ -2,7 +2,7 @@
 Only:
   environment: live
 ---
-Heyday\CacheInclude\Manager:
+LeftAndMain:
   extra_requirements_javascript:
     silverstripe-cacheinclude-manager/assets/production/js/bundle.js:
   extra_requirements_css:
@@ -12,29 +12,10 @@ Heyday\CacheInclude\Manager:
 Except:
   environment: live
 ---
-Heyday\CacheInclude\Manager:
+LeftAndMain:
   extra_requirements_javascript:
-    silverstripe-cacheinclude-manager/assets/source/js/app.js:
+    silverstripe-cacheinclude-manager/assets/production/js/bundle.js:
   extra_requirements_css:
-    silverstripe-cacheinclude-manager/assets/source/css/style.css:
+    silverstripe-cacheinclude-manager/assets/production/css/style.css:
       media: screen
-      
----
-Name: cachemanager
----
-Heyday\CacheInclude\ManagerAdmin:
-  constructor:
-    0: %$CacheModel
-    1: %$React
-      
-Heyday\CacheInclude\ManagerController:
-  constructor:
-    0: %$\League\Fractal\Manager
-    1: %$CacheModel
-    
-CacheModel:
-  class: Heyday\CacheInclude\CacheModel
-  constructor:
-      0: '%$DoctrineCache'
-      1: '%$CacheIncludeConfig'
     

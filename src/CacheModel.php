@@ -28,13 +28,13 @@ class CacheModel
      */
     public function getAll()
     {
-        $caches = [];
+        $keys = [];
 
         foreach ($this->config as $name => $_) {
-            $caches[$name] = $this->get($name);
+            $keys[$name] = $this->getKeys($name);
         }
         
-        return $caches;
+        return $keys;
     }
 
     /**
@@ -43,12 +43,9 @@ class CacheModel
      */
     public function get($name)
     {
-        $this->assertHasName($name);
-
         $caches = [];
-        $keys = (array) $this->cache->fetch($name);
-        
-        foreach ($keys as $key) {
+
+        foreach ($this->getKeys($name) as $key) {
             $caches[] = [
                 'key' => $key,
                 'value' => $this->cache->fetch($key)
@@ -56,6 +53,25 @@ class CacheModel
         }
 
         return $caches;
+    }
+
+    /**
+     * @param $name
+     * @return bool|mixed|string
+     */
+    public function getKeys($name)
+    {
+        $this->assertHasName($name);
+
+        $keys = [];
+
+        foreach ((array) $this->cache->fetch($name) as $key => $value) {
+            if ($value) {
+                $keys[] = $key;
+            }
+        }
+        
+        return $keys;
     }
     
     public function delete($name)
