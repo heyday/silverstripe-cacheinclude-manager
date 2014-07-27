@@ -3,6 +3,7 @@
 namespace Heyday\CacheInclude;
 
 use LeftAndMain;
+use ReactJS\React;
 
 class ManagerAdmin extends LeftAndMain
 {
@@ -17,6 +18,16 @@ class ManagerAdmin extends LeftAndMain
      * @var \Heyday\CacheInclude\CacheModel
      */
     protected $model;
+
+    /**
+     * @param \Heyday\CacheInclude\CacheModel $model
+     * @param \ReactJS\React $react
+     */
+    public function __construct(CacheModel $model, React $react)
+    {
+        $this->model = $model;
+        $this->react = $react;
+    }
 
     /**
      * @return string

@@ -27,7 +27,7 @@ class ManagerController extends Controller
      * @var array
      */
     private static $allowed_actions = [
-        'flush'
+        'cache'
     ];
 
     /**
@@ -150,7 +150,8 @@ class ManagerController extends Controller
     }
 
     /**
-     * @return \League\Fractal\Resource\ResourceAbstract
+     * @param $value
+     * @return \League\Fractal\Resource\Item
      */
     protected function getSuccessResource($value)
     {

@@ -1,7 +1,7 @@
 {
-	"name": "eco",
+	"name": "cim",
 	"version": "0.0.0",
-	"description": "Ecoya",
+	"description": "CacheInclude Manager",
 	"dependencies": {
 		"react": "~0.11",
 		"browserify": "~4.2.3",
@@ -15,7 +15,7 @@
 		"build-less": "lessc -x source/less/style.less > production/css/style.min.css",
 		"build-less-dev": "lessc source/less/style.less  > production/css/style.css",
 		"build-react": "NODE_ENV=production npm run build-react-dev",
-		"build-react-dev": "browserify -r react > ./production/js/bundle.js",
+		"build-react-dev": "browserify -r react -r ./source/js/Manager > ./production/js/bundle.js",
 		"buiild": "npm run build-react && npm run build-less",
 		"buiild-dev": "npm run build-react-dev && npm run build-less-dev"
 	}

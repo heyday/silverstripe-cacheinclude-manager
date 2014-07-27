@@ -18,3 +18,23 @@ Heyday\CacheInclude\Manager:
   extra_requirements_css:
     silverstripe-cacheinclude-manager/assets/source/css/style.css:
       media: screen
+      
+---
+Name: cachemanager
+---
+Heyday\CacheInclude\ManagerAdmin:
+  constructor:
+    0: %$CacheModel
+    1: %$React
+      
+Heyday\CacheInclude\ManagerController:
+  constructor:
+    0: %$\League\Fractal\Manager
+    1: %$CacheModel
+    
+CacheModel:
+  class: Heyday\CacheInclude\CacheModel
+  constructor:
+      0: '%$DoctrineCache'
+      1: '%$CacheIncludeConfig'
+    
