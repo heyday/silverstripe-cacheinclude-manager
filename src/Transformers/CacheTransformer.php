@@ -17,6 +17,8 @@ class CacheTransformer extends TransformerAbstract
         if (isset($cache['value'])) {
             if ($cache['value'] instanceof \SS_HTTPResponse) {
                 $item['value'] = $cache['value']->getBody();
+            } else {
+                $item['value'] = $cache['value'];
             }
         }
         
