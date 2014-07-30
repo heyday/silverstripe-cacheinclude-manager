@@ -13,15 +13,12 @@
 	<script src="/silverstripe-cacheinclude-manager/assets/production/js/bundle.js"></script>
 </head>
 <body>
-	<nav class="navbar navbar-default" role="navigation">
-		<div class="container-fluid">
-			<a class="navbar-brand" href="/cache-manager/">Cache Manger</a>
-			<ul class="nav navbar-nav">
-				<li><a href="/admin/">Admin</a></li>
-			</ul>
+	<div class="container">
+		<div class="page-header">
+			<h1><span>Cache Manager</span>
+				<small>by Heyday!</small>
+			</h1>
 		</div>
-	</nav>
-	<div class="col-md-12">
 		$ManagerComponent
 	</div>
 </body>

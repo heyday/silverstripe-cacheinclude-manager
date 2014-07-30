@@ -125,32 +125,39 @@ class ManagerController extends Controller
      */
     protected function cacheGET(SS_HTTPRequest $request)
     {
-        if ($request->param('ID')) {
-            try {
-                $resource = new Collection(
-                    $this->cacheModel->get($request->param('ID')),
-                    new Transformers\CacheTransformer()
-                );
+        $statusCode = 200;
+        $name = $request->param('ID');
+        $key = $request->param('OtherID');
+        $cacheTransformer = new Transformers\CacheTransformer();
+        
+        $this->response->addHeader('Content-Type', 'application/json');
 
-                $this->response->setStatusCode(200);
-                $this->response->addHeader('Content-Type', 'application/json');
-                $this->response->setBody($this->resourceToJson($resource));
+        if ($name) {
+            try {
+                if ($key) {
+                    $resource = new Item(
+                        $this->cacheModel->getByKey($name, $key),
+                        $cacheTransformer
+                    );
+                } else {
+                    $resource = new Collection(
+                        $this->cacheModel->get($name),
+                        $cacheTransformer
+                    );
+                }
             } catch (\InvalidArgumentException $e) {
-                $this->response->setStatusCode(400);
-                $this->response->setBody($this->resourceToJson($this->getSuccessResource(false)));
+                $statusCode = 400;
+                $resource = $this->getSuccessResource(false);
             }
         } else {
             $resource = new Collection(
                 $this->cacheModel->getAll(),
-                new Transformers\CacheTransformer()
+                $cacheTransformer
             );
-
-            $this->response->setStatusCode(200);
-            $this->response->addHeader('Content-Type', 'application/json');
-            $this->response->setBody($this->resourceToJson($resource));
-
         }
 
+        $this->response->setStatusCode($statusCode);
+        $this->response->setBody($this->resourceToJson($resource));
         return $this->response;
     }
 

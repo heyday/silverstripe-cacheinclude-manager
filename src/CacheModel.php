@@ -11,8 +11,8 @@ use Heyday\CacheInclude\Configs\ConfigInterface;
 class CacheModel
 {
     /**
-     * @param CacheProvider $cache
-     * @param ConfigInterface $config
+     * @param \Doctrine\Common\Cache\CacheProvider $cache
+     * @param \Heyday\CacheInclude\Configs\ConfigInterface $config
      */
     public function __construct(
         CacheProvider $cache,
@@ -49,13 +49,26 @@ class CacheModel
         $caches = [];
 
         foreach ($this->getKeys($name) as $key) {
-            $caches[] = [
-                'key' => $key,
-                'value' => $this->cache->fetch($key)
-            ];
+            $caches[] = $this->getByKey($name, $key);
         }
 
         return $caches;
+    }
+
+    /**
+     * @param $name
+     * @param $key
+     * @return array
+     */
+    public function getByKey($name, $key)
+    {
+        $this->assertHasName($name);
+        $this->assertHasKey($key);
+
+        return [
+            'key' => $key,
+            'value' => $this->cache->fetch($key)
+        ];
     }
 
     /**
@@ -98,6 +111,20 @@ class CacheModel
             throw new \InvalidArgumentException(sprintf(
                 "The cache name '%s' doesn't exist in the config",
                 $name
+            ));
+        }
+    }
+
+    /**
+     * @param $key
+     * @throw \InvalidArgumentException
+     */
+    protected function assertHasKey($key)
+    {
+        if (null === $this->cache->fetch($key)) {
+            throw new \InvalidArgumentException(sprintf(
+                "The cache key '%s' doesn't exist",
+                $key
             ));
         }
     }

@@ -2,7 +2,7 @@ var ManagerDispatcher = require('../ManagerDispatcher');
 var ManagerConstants = require('../constants/ManagerConstants');
 var request = require('superagent');
 
-module.exports = {
+var ActionsCreators = {
 	deleteCache: function(cache) {
 		ManagerDispatcher.handleViewAction({
 			type: ManagerConstants.ActionTypes.DELETE_CACHE,
@@ -17,5 +17,12 @@ module.exports = {
 				});
 			}
 		});
+	},
+	deleteCaches: function(caches) {
+		caches.forEach(function (cache) {
+			ActionsCreators.deleteCache(cache);
+		});
 	}
-};
+}
+
+module.exports = ActionsCreators;

@@ -20176,6 +20176,8 @@ module.exports = function(arr, fn, initial){
   
   return curr;
 };
+},{}],"./source/js/Manager":[function(require,module,exports){
+module.exports=require('nsSFmD');
 },{}],"nsSFmD":[function(require,module,exports){
 /** @jsx React.DOM */
 
@@ -20185,6 +20187,7 @@ var React = require('react');
 var ManagerServerActionCreators = require('./actionCreators/ManagerServerActionCreators');
 var ManagerCacheActionCreators = require('./actionCreators/ManagerCacheActionCreators');
 var CacheStore = require('./stores/CacheStore');
+var ServerUpdatesAPI = require('./utils/ServerUpdatesAPI');
 
 /**
  * 
@@ -20203,26 +20206,48 @@ var Cache = React.createClass({displayName: 'Cache',
 			keys: React.PropTypes.arrayOf(React.PropTypes.string)
 		})
 	},
+	
+	getInitialState: function () {
+		return {
+			viewKeys: false
+		};
+	},
 
 	render: function () {
-		var caches = this.props.cache.keys.map(function (key) {
-			return (
-				React.DOM.li(null, key)
-			);
-		});
-		
 		return (
 			React.DOM.div(null, 
-				React.DOM.h1(null, this.props.cache.name, " ", React.DOM.button({onClick: this.handleDelete, className: "btn btn-danger"}, "Delete cached items")), 
-				React.DOM.ul(null, 
-					caches
-				)
+				React.DOM.h3(null, 
+					this.props.cache.name, " ", React.DOM.span({className: "badge"}, this.props.cache.keys.length), " ", this.renderDeleteButton(), " ", this.renderViewKeysButton()
+				), 
+				this.state.viewKeys && this.renderKeys()
 			)
 		);
 	},
 
+	renderDeleteButton: function () {
+		return React.DOM.button({onClick: this.handleDelete, disabled: !this.props.cache.keys.length, className: "btn btn-danger btn-sm"}, "Delete keys");
+	},
+
+	renderViewKeysButton: function () {
+		return React.DOM.button({onClick: this.handleToggleViewKeys, disabled: !this.props.cache.keys.length, className: "btn btn-info btn-sm"}, this.state.viewKeys ? 'Hide' : 'Show', " keys");
+	},
+
+	renderKeys: function () {
+		var caches = this.props.cache.keys.map(function (key, i) {
+			return (
+				React.DOM.li({key: i}, key)
+				);
+		});
+		
+		return React.DOM.ul(null, caches);
+	},
+
 	handleDelete: function () {
 		ManagerCacheActionCreators.deleteCache(this.props.cache);
+	},
+
+	handleToggleViewKeys: function () {
+		this.setState({viewKeys: !this.state.viewKeys});
 	}
 });
 
@@ -20239,8 +20264,15 @@ var Manager = React.createClass({displayName: 'Manager',
 		CacheStore.addChangeListener(this._onChange);
 
 		if (this.props.initialCaches) {
-			ManagerServerActionCreators.receiveAllCaches(this.props.initialCaches);
+			ManagerServerActionCreators.receiveCaches(this.props.initialCaches);
 		}
+
+		ServerUpdatesAPI.setupLongPolling();
+	},
+
+	componentWillUnmount: function () {
+		CacheStore.removeChangeListener(this._onChange);
+		ServerUpdatesAPI.removeLongPolling();
 	},
 
 	render: function () {
@@ -20250,9 +20282,14 @@ var Manager = React.createClass({displayName: 'Manager',
 
 		return (
 			React.DOM.div(null, 
+				React.DOM.button({onClick: this.handleDelete, className: "btn btn-danger"}, "Delete all"), 
 				caches
 			)
 		);
+	},
+
+	handleDelete: function () {
+		ManagerCacheActionCreators.deleteCaches(this.state.caches);
 	},
 
 	/**
@@ -20264,9 +20301,7 @@ var Manager = React.createClass({displayName: 'Manager',
 });
 
 module.exports = Manager;
-},{"./actionCreators/ManagerCacheActionCreators":154,"./actionCreators/ManagerServerActionCreators":155,"./stores/CacheStore":159,"react":"M6d2gk"}],"./source/js/Manager":[function(require,module,exports){
-module.exports=require('nsSFmD');
-},{}],153:[function(require,module,exports){
+},{"./actionCreators/ManagerCacheActionCreators":154,"./actionCreators/ManagerServerActionCreators":155,"./stores/CacheStore":159,"./utils/ServerUpdatesAPI":160,"react":"M6d2gk"}],153:[function(require,module,exports){
 var Dispatcher = require('./flux/Dispatcher');
 var copyProperties = require('react/lib/copyProperties');
 
@@ -20303,7 +20338,7 @@ var ManagerDispatcher = require('../ManagerDispatcher');
 var ManagerConstants = require('../constants/ManagerConstants');
 var request = require('superagent');
 
-module.exports = {
+var ActionsCreators = {
 	deleteCache: function(cache) {
 		ManagerDispatcher.handleViewAction({
 			type: ManagerConstants.ActionTypes.DELETE_CACHE,
@@ -20318,21 +20353,31 @@ module.exports = {
 				});
 			}
 		});
+	},
+	deleteCaches: function(caches) {
+		caches.forEach(function (cache) {
+			ActionsCreators.deleteCache(cache);
+		});
 	}
-};
+}
+
+module.exports = ActionsCreators;
 },{"../ManagerDispatcher":153,"../constants/ManagerConstants":156,"superagent":148}],155:[function(require,module,exports){
 var ManagerDispatcher = require('../ManagerDispatcher');
 var ManagerConstants = require('../constants/ManagerConstants');
+var request = require('superagent');
 
-module.exports = {
-	receiveAllCaches: function(caches) {
+var ActionCreators = {
+	receiveCaches: function(caches) {
 		ManagerDispatcher.handleServerAction({
 			type: ManagerConstants.ActionTypes.RECEIVE_CACHES,
 			caches: caches
 		});
 	}
 };
-},{"../ManagerDispatcher":153,"../constants/ManagerConstants":156}],156:[function(require,module,exports){
+
+module.exports = ActionCreators;
+},{"../ManagerDispatcher":153,"../constants/ManagerConstants":156,"superagent":148}],156:[function(require,module,exports){
 
 var keyMirror = require('react/lib/keyMirror');
 
@@ -20753,4 +20798,44 @@ ManagerDispatcher.register(function(payload) {
 });
 
 module.exports = CacheStore;
-},{"../ManagerDispatcher":153,"../constants/ManagerConstants":156,"events":1,"react/lib/merge":131,"react/lib/update":144}]},{},[])
+},{"../ManagerDispatcher":153,"../constants/ManagerConstants":156,"events":1,"react/lib/merge":131,"react/lib/update":144}],160:[function(require,module,exports){
+var request = require('superagent');
+var ManagerServerActionCreators = require('../actionCreators/ManagerServerActionCreators');
+
+var POLLING_RATE = 2000;
+var timeout = false;
+
+/**
+ * Set up long polling
+ */
+function setupLongPolling() {
+	if (timeout) {
+		return;
+	}
+	
+	timeout = setTimeout(function () {
+		request.get('/cache-manager/cache/').end(function (res) {
+			if (!res.error) {
+				ManagerServerActionCreators.receiveCaches(res.body.data);
+			}
+			timeout = false;
+			setupLongPolling();
+		});
+	}, POLLING_RATE);
+}
+
+/**
+ * Remove the long polling
+ */
+function removeLongPolling(){
+	if (timeout) {
+		clearTimeout(timeout);
+		timeout = false;
+	}
+}
+
+module.exports = {
+	setupLongPolling: setupLongPolling,
+	removeLongPolling: removeLongPolling
+};
+},{"../actionCreators/ManagerServerActionCreators":155,"superagent":148}]},{},[])
