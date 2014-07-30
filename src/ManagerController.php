@@ -8,8 +8,10 @@ use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use Permission;
+use ReactJS\React;
 use Security;
 use SS_HTTPRequest;
+use SSViewer;
 
 class ManagerController extends Controller
 {
@@ -21,14 +23,12 @@ class ManagerController extends Controller
     /**
      * @var \Heyday\CacheInclude\CacheModel
      */
-    protected $cache;
+    protected $cacheModel;
 
     /**
-     * @var array
+     * @var \ReactJS\React
      */
-    private static $allowed_actions = [
-        'cache'
-    ];
+    protected $react;
 
     /**
      * The default access code for the controller
@@ -38,16 +38,43 @@ class ManagerController extends Controller
 
     /**
      * @param \League\Fractal\Manager $fractal
-     * @param \Heyday\CacheInclude\CacheModel $model
+     * @param \Heyday\CacheInclude\CacheModel $cacheModel
+     * @param \ReactJS\React $react
      */
-    public function __construct(Manager $fractal, CacheModel $model)
+    public function __construct(Manager $fractal, CacheModel $cacheModel, React $react)
     {
         $this->fractal = $fractal;
-        $this->model = $model;
+        $this->cacheModel = $cacheModel;
+        $this->react = $react;
+        parent::__construct();
     }
 
     /**
-     * 
+     * @param $action
+     * @return \SSViewer
+     */
+    public function getViewer($action)
+    {
+        return new SSViewer('ManagerController');
+    }
+
+    /**
+     * @return string
+     */
+    public function ManagerComponent()
+    {
+        return $this->react->renderAutoMountingComponent(
+            './source/js/Manager',
+            [
+                'initialCaches' => $this->cacheModel->getAll()
+            ],
+            'cacheinclude-manager'
+        );
+    }
+
+
+    /**
+     * Check the permissions
      */
     public function init()
     {
@@ -64,6 +91,15 @@ class ManagerController extends Controller
     protected function hasAccess()
     {
         return Director::is_cli() || Permission::check($this->config()->get('access_code'));
+    }
+
+    /**
+     * @param SS_HTTPRequest $request
+     * @return string
+     */
+    public function index(SS_HTTPRequest $request)
+    {
+        return $this->render();
     }
 
     /**
@@ -92,7 +128,7 @@ class ManagerController extends Controller
         if ($request->param('ID')) {
             try {
                 $resource = new Collection(
-                    $this->model->get($request->param('ID')),
+                    $this->cacheModel->get($request->param('ID')),
                     new Transformers\CacheTransformer()
                 );
 
@@ -105,13 +141,14 @@ class ManagerController extends Controller
             }
         } else {
             $resource = new Collection(
-                $this->model->getAll(),
+                $this->cacheModel->getAll(),
                 new Transformers\CacheTransformer()
             );
 
             $this->response->setStatusCode(200);
             $this->response->addHeader('Content-Type', 'application/json');
             $this->response->setBody($this->resourceToJson($resource));
+
         }
 
         return $this->response;
@@ -127,16 +164,16 @@ class ManagerController extends Controller
             $this->response->setStatusCode(400);
             return $this->response;
         }
-        
+
         try {
-            $this->model->delete($request->param('ID'));
+            $this->cacheModel->delete($request->param('ID'));
             $this->response->addHeader('Content-Type', 'application/json');
             $this->response->setBody($this->resourceToJson($this->getSuccessResource(true)));
         } catch (\InvalidArgumentException $e) {
             $this->response->setStatusCode(400);
             $this->response->setBody($this->resourceToJson($this->getSuccessResource(false)));
         }
-        
+
         return $this->response;
     }
 
@@ -156,5 +193,14 @@ class ManagerController extends Controller
     protected function getSuccessResource($value)
     {
         return new Item($value, new Transformers\SuccessTransformer());
+    }
+
+    /**
+     * Template helper method to check if live
+     * @return bool
+     */
+    public function isLive()
+    {
+        return Director::isLive();
     }
 }

@@ -28,13 +28,16 @@ class CacheModel
      */
     public function getAll()
     {
-        $keys = [];
+        $caches = [];
 
         foreach ($this->config as $name => $_) {
-            $keys[$name] = $this->getKeys($name);
+            $caches[] = [
+                'name' => $name,
+                'keys' => $this->getKeys($name)
+            ];
         }
         
-        return $keys;
+        return $caches;
     }
 
     /**

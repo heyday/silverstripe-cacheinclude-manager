@@ -1,23 +1,28 @@
 {
-	"name": "cim",
-	"version": "0.0.0",
-	"description": "CacheInclude Manager",
-	"dependencies": {
-		"react": "~0.11",
-		"browserify": "~4.2.3",
-		"reactify": "~0.14.0",
-		"less": "~1.3.0",
-		"envify": "~2.0.1"
-	},
-	"browserify": {
-		"transform": ["reactify", "envify"]
-	},
-	"scripts": {
-		"build-less": "lessc -x source/less/style.less > production/css/style.min.css",
-		"build-less-dev": "lessc source/less/style.less  > production/css/style.css",
-		"build-js": "NODE_ENV=production npm run build-js-dev",
-		"build-js-dev": "browserify -r react -r ./source/js/Manager > ./production/js/bundle.js",
-		"build": "npm run build-js; npm run build-less",
-		"build-dev": "npm run build-js-dev; npm run build-less-dev"
-	}
+  "name": "cim",
+  "version": "0.0.0",
+  "description": "CacheInclude Manager",
+  "dependencies": {
+    "react": "~0.11",
+    "browserify": "~4.2.3",
+    "reactify": "~0.14.0",
+    "less": "~1.4",
+    "envify": "~2.0.1",
+    "bootstrap": "~3.2.0",
+    "superagent": "~0.18.2"
+  },
+  "browserify": {
+    "transform": [
+      "reactify",
+      "envify"
+    ]
+  },
+  "scripts": {
+    "build-less": "lessc -x source/less/style.less > production/css/style.min.css",
+    "build-less-dev": "lessc source/less/style.less  > production/css/style.css",
+    "build-js": "NODE_ENV=production npm run build-js-dev",
+    "build-js-dev": "browserify -r react -r ./source/js/Manager > ./production/js/bundle.js",
+    "build": "npm run build-js; npm run build-less",
+    "build-dev": "npm run build-js-dev; npm run build-less-dev"
+  }
 }

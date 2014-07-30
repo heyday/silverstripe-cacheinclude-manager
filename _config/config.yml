@@ -1,21 +1,3 @@
----
-Only:
-  environment: live
----
-LeftAndMain:
-  extra_requirements_javascript:
-    silverstripe-cacheinclude-manager/assets/production/js/bundle.js:
-  extra_requirements_css:
-    silverstripe-cacheinclude-manager/assets/production/css/style.min.css:
-      media: screen
----
-Except:
-  environment: live
----
-LeftAndMain:
-  extra_requirements_javascript:
-    silverstripe-cacheinclude-manager/assets/production/js/bundle.js:
-  extra_requirements_css:
-    silverstripe-cacheinclude-manager/assets/production/css/style.css:
-      media: screen
-    
+Heyday\CacheInclude\ManagerController:
+  allowed_actions:
+    - cache

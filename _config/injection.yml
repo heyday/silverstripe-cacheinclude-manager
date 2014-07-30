@@ -2,11 +2,6 @@
 Name: cachemanager
 ---
 Injector:
-  CacheManagerAdmin:
-    constructor:
-      0: %$CacheModel
-      1: %$ManagerReact
-
   ManagerReact:
     class: ReactJS\React
         
@@ -14,6 +9,7 @@ Injector:
     constructor:
       0: %$\League\Fractal\Manager
       1: %$CacheModel
+      2: %$ManagerReact
       
   CacheModel:
     class: Heyday\CacheInclude\CacheModel
