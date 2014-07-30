@@ -31,12 +31,6 @@ class ManagerController extends Controller
     protected $react;
 
     /**
-     * The default access code for the controller
-     * @var string
-     */
-    private static $access_code = 'ADMIN';
-
-    /**
      * @param \League\Fractal\Manager $fractal
      * @param \Heyday\CacheInclude\CacheModel $cacheModel
      * @param \ReactJS\React $react
@@ -90,7 +84,7 @@ class ManagerController extends Controller
      */
     protected function hasAccess()
     {
-        return Director::is_cli() || Permission::check($this->config()->get('access_code'));
+        return Director::is_cli() || Permission::check('ADMIN');
     }
 
     /**
