@@ -1,9 +1,11 @@
 # CacheInclude Manager
 
+A management interface for CacheInclude
+
 ## Installation (with composer)
+
+	$ composer require "heyday/silverstripe-cacheinclude-manager:~0.1.0"
 
 ## Usage
 
-## Unit testing
-    $ composer install --dev
-    $ vendor/bin/phpunit
+Go to '/cache-manager/' in your browser.
