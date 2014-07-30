@@ -162,6 +162,7 @@ class ManagerController extends Controller
     {
         if (!$request->param('ID')) {
             $this->response->setStatusCode(400);
+            $this->response->setBody($this->resourceToJson($this->getSuccessResource(false)));
             return $this->response;
         }
 

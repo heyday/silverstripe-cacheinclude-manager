@@ -19,12 +19,14 @@ function getStateFromStores() {
 
 var Cache = React.createClass({
 	propTypes: {
-		name: React.PropTypes.string,
-		keys: React.PropTypes.arrayOf(React.PropTypes.string)
+		cache: React.PropTypes.shape({
+			name: React.PropTypes.string,
+			keys: React.PropTypes.arrayOf(React.PropTypes.string)
+		})
 	},
 
 	render: function () {
-		var caches = this.props.keys.map(function (key) {
+		var caches = this.props.cache.keys.map(function (key) {
 			return (
 				<li>{key}</li>
 			);
@@ -32,7 +34,7 @@ var Cache = React.createClass({
 		
 		return (
 			<div>
-				<h1>{this.props.name} <button onClick={this.handleDelete} className="btn btn-danger">Delete cached items</button></h1>
+				<h1>{this.props.cache.name} <button onClick={this.handleDelete} className="btn btn-danger">Delete cached items</button></h1>
 				<ul>
 					{caches}
 				</ul>
@@ -41,7 +43,7 @@ var Cache = React.createClass({
 	},
 
 	handleDelete: function () {
-		ManagerCacheActionCreators.deleteCache(this.props.name);
+		ManagerCacheActionCreators.deleteCache(this.props.cache);
 	}
 });
 
@@ -64,7 +66,7 @@ var Manager = React.createClass({
 
 	render: function () {
 		var caches = this.state.caches.map(function (cache, i) {
-			return <Cache key={i} name={cache.name} keys={cache.keys} />;
+			return <Cache key={i} cache={cache} />;
 		});
 
 		return (

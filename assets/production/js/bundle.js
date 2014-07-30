@@ -20176,8 +20176,6 @@ module.exports = function(arr, fn, initial){
   
   return curr;
 };
-},{}],"./source/js/Manager":[function(require,module,exports){
-module.exports=require('nsSFmD');
 },{}],"nsSFmD":[function(require,module,exports){
 /** @jsx React.DOM */
 
@@ -20200,12 +20198,14 @@ function getStateFromStores() {
 
 var Cache = React.createClass({displayName: 'Cache',
 	propTypes: {
-		name: React.PropTypes.string,
-		keys: React.PropTypes.arrayOf(React.PropTypes.string)
+		cache: React.PropTypes.shape({
+			name: React.PropTypes.string,
+			keys: React.PropTypes.arrayOf(React.PropTypes.string)
+		})
 	},
 
 	render: function () {
-		var caches = this.props.keys.map(function (key) {
+		var caches = this.props.cache.keys.map(function (key) {
 			return (
 				React.DOM.li(null, key)
 			);
@@ -20213,7 +20213,7 @@ var Cache = React.createClass({displayName: 'Cache',
 		
 		return (
 			React.DOM.div(null, 
-				React.DOM.h1(null, this.props.name, " ", React.DOM.button({onClick: this.handleDelete, className: "btn btn-danger"}, "Delete cached items")), 
+				React.DOM.h1(null, this.props.cache.name, " ", React.DOM.button({onClick: this.handleDelete, className: "btn btn-danger"}, "Delete cached items")), 
 				React.DOM.ul(null, 
 					caches
 				)
@@ -20222,7 +20222,7 @@ var Cache = React.createClass({displayName: 'Cache',
 	},
 
 	handleDelete: function () {
-		ManagerCacheActionCreators.deleteCache(this.props.name);
+		ManagerCacheActionCreators.deleteCache(this.props.cache);
 	}
 });
 
@@ -20245,7 +20245,7 @@ var Manager = React.createClass({displayName: 'Manager',
 
 	render: function () {
 		var caches = this.state.caches.map(function (cache, i) {
-			return Cache({key: i, name: cache.name, keys: cache.keys});
+			return Cache({key: i, cache: cache});
 		});
 
 		return (
@@ -20264,7 +20264,9 @@ var Manager = React.createClass({displayName: 'Manager',
 });
 
 module.exports = Manager;
-},{"./actionCreators/ManagerCacheActionCreators":154,"./actionCreators/ManagerServerActionCreators":155,"./stores/CacheStore":159,"react":"M6d2gk"}],153:[function(require,module,exports){
+},{"./actionCreators/ManagerCacheActionCreators":154,"./actionCreators/ManagerServerActionCreators":155,"./stores/CacheStore":159,"react":"M6d2gk"}],"./source/js/Manager":[function(require,module,exports){
+module.exports=require('nsSFmD');
+},{}],153:[function(require,module,exports){
 var Dispatcher = require('./flux/Dispatcher');
 var copyProperties = require('react/lib/copyProperties');
 
@@ -20299,16 +20301,26 @@ module.exports = ManagerDispatcher;
 },{"./flux/Dispatcher":157,"react/lib/copyProperties":98}],154:[function(require,module,exports){
 var ManagerDispatcher = require('../ManagerDispatcher');
 var ManagerConstants = require('../constants/ManagerConstants');
+var request = require('superagent');
 
 module.exports = {
-	deleteCache: function(name) {
+	deleteCache: function(cache) {
 		ManagerDispatcher.handleViewAction({
 			type: ManagerConstants.ActionTypes.DELETE_CACHE,
-			name: name
+			cache: cache
+		});
+
+		request.del('/cache-manager/cache/' + cache.name).end(function(res){
+			if (res.error) {
+				ManagerDispatcher.handleServerAction({
+					type: ManagerConstants.ActionTypes.RECEIVE_DELETE_CACHE_FAILED,
+					cache: cache
+				});
+			}
 		});
 	}
 };
-},{"../ManagerDispatcher":153,"../constants/ManagerConstants":156}],155:[function(require,module,exports){
+},{"../ManagerDispatcher":153,"../constants/ManagerConstants":156,"superagent":148}],155:[function(require,module,exports){
 var ManagerDispatcher = require('../ManagerDispatcher');
 var ManagerConstants = require('../constants/ManagerConstants');
 
@@ -20317,14 +20329,6 @@ module.exports = {
 		ManagerDispatcher.handleServerAction({
 			type: ManagerConstants.ActionTypes.RECEIVE_CACHES,
 			caches: caches
-		});
-	},
-	receiveDeleteFailed: function (name, rollback, response) {
-		ManagerDispatcher.handleServerAction({
-			type: ManagerConstants.ActionTypes.RECEIVE_DELETE_CACHE_FAILED,
-			name: name,
-			rollback: rollback,
-			response: response
 		});
 	}
 };
@@ -20652,9 +20656,7 @@ var EventEmitter = require('events').EventEmitter;
 var merge = require('react/lib/merge');
 var update = require('react/lib/update');
 var ManagerDispatcher = require('../ManagerDispatcher');
-var ManagerServerActionsCreators = require('../actionCreators/ManagerServerActionCreators');
 var ManagerConstants = require('../constants/ManagerConstants');
-var request = require('superagent');
 
 /**
  * Caches private storage
@@ -20683,6 +20685,18 @@ var CacheStore = merge(EventEmitter.prototype, {
 	
 	getAll: function() {
 		return _caches;
+	},
+	
+	addByName: function (name, keys) {
+		_caches = _caches.map(function (cache) {
+			if (name === cache.name) {
+				return update(cache, {
+					keys: {$set: keys}
+				});
+			}
+
+			return cache;
+		});
 	},
 
 	/**
@@ -20725,24 +20739,12 @@ ManagerDispatcher.register(function(payload) {
 			CacheStore.emitChange();
 			break;
 		case ManagerConstants.ActionTypes.DELETE_CACHE:
-			var rollback = CacheStore.getAll();
-
-			CacheStore.deleteByName(action.name);
+			CacheStore.deleteByName(action.cache.name);
 			CacheStore.emitChange();
-
-			request.del('/cache-manager/cache/' + action.name).end(function(res){
-				if (res.error) {
-					ManagerServerActionsCreators.receiveDeleteFailed(
-						action.name,
-						rollback,
-						res
-					);
-				}
-			});
 			break;
 
 		case ManagerConstants.ActionTypes.RECEIVE_DELETE_CACHE_FAILED:
-			CacheStore.init(action.rollback);
+			CacheStore.addByName(action.cache.name, action.cache.keys);
 			CacheStore.emitChange();
 			break;
 		default:
@@ -20751,4 +20753,4 @@ ManagerDispatcher.register(function(payload) {
 });
 
 module.exports = CacheStore;
-},{"../ManagerDispatcher":153,"../actionCreators/ManagerServerActionCreators":155,"../constants/ManagerConstants":156,"events":1,"react/lib/merge":131,"react/lib/update":144,"superagent":148}]},{},[])
+},{"../ManagerDispatcher":153,"../constants/ManagerConstants":156,"events":1,"react/lib/merge":131,"react/lib/update":144}]},{},[])

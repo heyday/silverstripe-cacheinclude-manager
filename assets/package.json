@@ -21,7 +21,7 @@
     "build-less": "lessc -x source/less/style.less > production/css/style.min.css",
     "build-less-dev": "lessc source/less/style.less  > production/css/style.css",
     "build-js": "NODE_ENV=production npm run build-js-dev",
-    "build-js-dev": "browserify -r react -r ./source/js/Manager > ./production/js/bundle.js",
+    "build-js-dev": "browserify -r react -r ./source/js/Manager -o ./production/js/bundle.js",
     "build": "npm run build-js; npm run build-less",
     "build-dev": "npm run build-js-dev; npm run build-less-dev"
   }

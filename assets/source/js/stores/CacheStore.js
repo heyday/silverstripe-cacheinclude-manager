@@ -2,9 +2,7 @@ var EventEmitter = require('events').EventEmitter;
 var merge = require('react/lib/merge');
 var update = require('react/lib/update');
 var ManagerDispatcher = require('../ManagerDispatcher');
-var ManagerServerActionsCreators = require('../actionCreators/ManagerServerActionCreators');
 var ManagerConstants = require('../constants/ManagerConstants');
-var request = require('superagent');
 
 /**
  * Caches private storage
@@ -33,6 +31,18 @@ var CacheStore = merge(EventEmitter.prototype, {
 	
 	getAll: function() {
 		return _caches;
+	},
+	
+	addByName: function (name, keys) {
+		_caches = _caches.map(function (cache) {
+			if (name === cache.name) {
+				return update(cache, {
+					keys: {$set: keys}
+				});
+			}
+
+			return cache;
+		});
 	},
 
 	/**
@@ -75,24 +85,12 @@ ManagerDispatcher.register(function(payload) {
 			CacheStore.emitChange();
 			break;
 		case ManagerConstants.ActionTypes.DELETE_CACHE:
-			var rollback = CacheStore.getAll();
-
-			CacheStore.deleteByName(action.name);
+			CacheStore.deleteByName(action.cache.name);
 			CacheStore.emitChange();
-
-			request.del('/cache-manager/cache/' + action.name).end(function(res){
-				if (res.error) {
-					ManagerServerActionsCreators.receiveDeleteFailed(
-						action.name,
-						rollback,
-						res
-					);
-				}
-			});
 			break;
 
 		case ManagerConstants.ActionTypes.RECEIVE_DELETE_CACHE_FAILED:
-			CacheStore.init(action.rollback);
+			CacheStore.addByName(action.cache.name, action.cache.keys);
 			CacheStore.emitChange();
 			break;
 		default:
