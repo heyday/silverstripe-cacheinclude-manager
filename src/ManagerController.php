@@ -84,7 +84,7 @@ class ManagerController extends Controller
      */
     protected function hasAccess()
     {
-        return Director::is_cli() || Permission::check('ADMIN');
+        return Director::is_cli() || Permission::check('ADMIN') || Director::isDev();
     }
 
     /**
