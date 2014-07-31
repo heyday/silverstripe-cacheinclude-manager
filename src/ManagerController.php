@@ -60,7 +60,10 @@ class ManagerController extends Controller
         return $this->react->renderAutoMountingComponent(
             './source/js/Manager',
             [
-                'initialCaches' => $this->cacheModel->getAll()
+                'initialCaches' => $this->resourceToArray(new Collection(
+                    $this->cacheModel->getAll(),
+                    new Transformers\CacheTransformer()
+                ))['data']
             ],
             'cacheinclude-manager'
         );
@@ -186,6 +189,15 @@ class ManagerController extends Controller
     protected function resourceToJson($resource)
     {
         return $this->fractal->createData($resource)->toJson();
+    }
+
+    /**
+     * @param \League\Fractal\Resource\ResourceAbstract $resource
+     * @return array
+     */
+    protected function resourceToArray($resource)
+    {
+        return $this->fractal->createData($resource)->toArray();
     }
 
     /**

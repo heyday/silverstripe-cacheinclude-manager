@@ -30,10 +30,11 @@ class CacheModel
     {
         $caches = [];
 
-        foreach ($this->config as $name => $_) {
+        foreach ($this->config as $name => $config) {
             $caches[] = [
                 'name' => $name,
-                'keys' => $this->getKeys($name)
+                'keys' => $this->getKeys($name),
+                'config' => $config
             ];
         }
         

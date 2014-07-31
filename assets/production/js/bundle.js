@@ -20203,13 +20203,15 @@ var Cache = React.createClass({displayName: 'Cache',
 	propTypes: {
 		cache: React.PropTypes.shape({
 			name: React.PropTypes.string,
-			keys: React.PropTypes.arrayOf(React.PropTypes.string)
+			keys: React.PropTypes.arrayOf(React.PropTypes.string),
+			config: React.PropTypes.object
 		})
 	},
 	
 	getInitialState: function () {
 		return {
-			viewKeys: false
+			viewKeys: false,
+			viewConfig: false
 		};
 	},
 
@@ -20217,8 +20219,12 @@ var Cache = React.createClass({displayName: 'Cache',
 		return (
 			React.DOM.div(null, 
 				React.DOM.h3(null, 
-					this.props.cache.name, " ", React.DOM.span({className: "badge"}, this.props.cache.keys.length), " ", this.renderDeleteButton(), " ", this.renderViewKeysButton()
+					this.props.cache.name, " ", React.DOM.span({className: "badge"}, this.props.cache.keys.length), 
+					" ", this.renderDeleteButton(), 
+					" ", this.renderViewConfigButton(), 
+					" ", this.renderViewKeysButton()
 				), 
+				this.state.viewConfig && this.renderConfig(), 
 				this.state.viewKeys && this.renderKeys()
 			)
 		);
@@ -20228,22 +20234,55 @@ var Cache = React.createClass({displayName: 'Cache',
 		return React.DOM.button({onClick: this.handleDelete, disabled: !this.props.cache.keys.length, className: "btn btn-danger btn-sm"}, "Delete keys");
 	},
 
+	renderViewConfigButton: function () {
+		return React.DOM.button({onClick: this.handleToggleViewConfig, className: "btn btn-info btn-sm"}, this.state.viewConfig ? 'Hide' : 'Show', " config");
+	},
+
 	renderViewKeysButton: function () {
 		return React.DOM.button({onClick: this.handleToggleViewKeys, disabled: !this.props.cache.keys.length, className: "btn btn-info btn-sm"}, this.state.viewKeys ? 'Hide' : 'Show', " keys");
 	},
+	
+	renderConfig: function () {
+		var config = {};
+		
+		for (var i in this.props.cache.config) {
+			config[i] = (
+				React.DOM.tr(null, 
+					React.DOM.td(null, i), 
+					React.DOM.td(null, this.props.cache.config[i])
+				)
+			);
+		}
+		
+		return (
+			React.DOM.div({className: "row"}, 
+				React.DOM.div({className: "col-md-6"}, 
+					React.DOM.div({className: "panel panel-default"}, 
+						React.DOM.table({className: "table table-striped"}, 
+							React.DOM.tbody(null, config)
+						)
+					)
+				)
+			)
+		);
+	},
 
 	renderKeys: function () {
-		var caches = this.props.cache.keys.map(function (key, i) {
+		var keys = this.props.cache.keys.map(function (key, i) {
 			return (
 				React.DOM.li({key: i}, key)
 				);
 		});
 		
-		return React.DOM.ul(null, caches);
+		return React.DOM.ul(null, keys);
 	},
 
 	handleDelete: function () {
 		ManagerCacheActionCreators.deleteCache(this.props.cache);
+	},
+
+	handleToggleViewConfig: function () {
+		this.setState({viewConfig: !this.state.viewConfig});
 	},
 
 	handleToggleViewKeys: function () {
