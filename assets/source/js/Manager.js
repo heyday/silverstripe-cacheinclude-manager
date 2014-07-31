@@ -36,16 +36,17 @@ var Cache = React.createClass({
 
 	render: function () {
 		return (
-			<div>
-				<h3>
-					{this.props.cache.name} <span className="badge">{this.props.cache.keys.length}</span> 
-					{" "}{this.renderDeleteButton()}
-					{" "}{this.renderViewConfigButton()}
-					{" "}{this.renderViewKeysButton()}
-				</h3>
+			<tbody>
+				<tr>
+					<td>{this.props.cache.name}</td>
+					<td><span className="badge">{this.props.cache.keys.length}</span></td>
+					<td>{this.renderDeleteButton()}</td>
+					<td>{this.renderViewConfigButton()}</td>
+					<td>{this.renderViewKeysButton()}</td>
+				</tr>
 				{this.state.viewConfig && this.renderConfig()}
 				{this.state.viewKeys && this.renderKeys()}
-			</div>
+			</tbody>
 		);
 	},
 
@@ -74,15 +75,15 @@ var Cache = React.createClass({
 		}
 		
 		return (
-			<div className="row">
-				<div className="col-md-6">
+			<tr>
+				<td colSpan="5">
 					<div className="panel panel-default">
 						<table className="table table-striped">
 							<tbody>{config}</tbody>
 						</table>
 					</div>
-				</div>
-			</div>
+				</td>
+			</tr>
 		);
 	},
 
@@ -93,7 +94,13 @@ var Cache = React.createClass({
 				);
 		});
 		
-		return <ul>{keys}</ul>;
+		return (
+			<tr>
+				<td colSpan="5">
+					<ul>{keys}</ul>
+				</td>
+			</tr>
+		);
 	},
 
 	handleDelete: function () {
@@ -141,7 +148,18 @@ var Manager = React.createClass({
 		return (
 			<div>
 				<button onClick={this.handleDelete} className="btn btn-danger">Delete all</button>
-				{caches}
+				<table className="table">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Keys</th>
+							<th>Delete</th>
+							<th>Config</th>
+							<th>Keys</th>
+						</tr>
+					</thead>
+					{caches}
+				</table>
 			</div>
 		);
 	},

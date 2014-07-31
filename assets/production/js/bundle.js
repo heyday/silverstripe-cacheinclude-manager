@@ -20217,12 +20217,13 @@ var Cache = React.createClass({displayName: 'Cache',
 
 	render: function () {
 		return (
-			React.DOM.div(null, 
-				React.DOM.h3(null, 
-					this.props.cache.name, " ", React.DOM.span({className: "badge"}, this.props.cache.keys.length), 
-					" ", this.renderDeleteButton(), 
-					" ", this.renderViewConfigButton(), 
-					" ", this.renderViewKeysButton()
+			React.DOM.tbody(null, 
+				React.DOM.tr(null, 
+					React.DOM.td(null, this.props.cache.name), 
+					React.DOM.td(null, React.DOM.span({className: "badge"}, this.props.cache.keys.length)), 
+					React.DOM.td(null, this.renderDeleteButton()), 
+					React.DOM.td(null, this.renderViewConfigButton()), 
+					React.DOM.td(null, this.renderViewKeysButton())
 				), 
 				this.state.viewConfig && this.renderConfig(), 
 				this.state.viewKeys && this.renderKeys()
@@ -20255,8 +20256,8 @@ var Cache = React.createClass({displayName: 'Cache',
 		}
 		
 		return (
-			React.DOM.div({className: "row"}, 
-				React.DOM.div({className: "col-md-6"}, 
+			React.DOM.tr(null, 
+				React.DOM.td({colSpan: "5"}, 
 					React.DOM.div({className: "panel panel-default"}, 
 						React.DOM.table({className: "table table-striped"}, 
 							React.DOM.tbody(null, config)
@@ -20274,7 +20275,13 @@ var Cache = React.createClass({displayName: 'Cache',
 				);
 		});
 		
-		return React.DOM.ul(null, keys);
+		return (
+			React.DOM.tr(null, 
+				React.DOM.td({colSpan: "5"}, 
+					React.DOM.ul(null, keys)
+				)
+			)
+		);
 	},
 
 	handleDelete: function () {
@@ -20322,7 +20329,18 @@ var Manager = React.createClass({displayName: 'Manager',
 		return (
 			React.DOM.div(null, 
 				React.DOM.button({onClick: this.handleDelete, className: "btn btn-danger"}, "Delete all"), 
-				caches
+				React.DOM.table({className: "table"}, 
+					React.DOM.thead(null, 
+						React.DOM.tr(null, 
+							React.DOM.th(null, "Name"), 
+							React.DOM.th(null, "Keys"), 
+							React.DOM.th(null, "Delete"), 
+							React.DOM.th(null, "Config"), 
+							React.DOM.th(null, "Keys")
+						)
+					), 
+					caches
+				)
 			)
 		);
 	},
