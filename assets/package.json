@@ -18,8 +18,8 @@
     ]
   },
   "scripts": {
-    "build-less": "lessc -x source/less/style.less > production/css/style.min.css",
-    "build-less-dev": "lessc source/less/style.less  > production/css/style.css",
+    "build-less": "lessc -x source/less/style.less > production/css/style.min.css; cp -r node_modules/bootstrap/fonts production/",
+    "build-less-dev": "lessc source/less/style.less  > production/css/style.css; cp -r node_modules/bootstrap/fonts production/",
     "build-js": "NODE_ENV=production npm run build-js-dev",
     "build-js-dev": "browserify -r react -r ./source/js/Manager -o ./production/js/bundle.js",
     "build": "npm run build-js; npm run build-less",

@@ -14,11 +14,6 @@
 </head>
 <body>
 	<div class="container">
-		<div class="page-header">
-			<h1><span>Cache Manager</span>
-				<small>by Heyday!</small>
-			</h1>
-		</div>
 		$ManagerComponent
 	</div>
 </body>

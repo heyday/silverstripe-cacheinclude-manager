@@ -2,129 +2,155 @@
 
 'use strict';
 
-var React = require('react');
+var React = require('react/addons');
+var cx = React.addons.classSet;
 var ManagerServerActionCreators = require('./actionCreators/ManagerServerActionCreators');
 var ManagerCacheActionCreators = require('./actionCreators/ManagerCacheActionCreators');
 var CacheStore = require('./stores/CacheStore');
 var ServerUpdatesAPI = require('./utils/ServerUpdatesAPI');
 
+var cacheShape = React.PropTypes.shape({
+	name: React.PropTypes.string,
+	keys: React.PropTypes.arrayOf(React.PropTypes.string),
+	config: React.PropTypes.object
+});
+
 /**
  * 
- * @returns {{caches: (*|Object)}}
  */
-function getStateFromStores() {
-	return {
-		caches: CacheStore.getAll()
-	};
+function getCachesFromStore() {
+	return CacheStore.getAll();
 }
 
-var Cache = React.createClass({
+var Nav = React.createClass({
+	render: function () {
+		return (
+			<ul className="nav nav-pills nav-stacked">
+				{this.props.children}
+			</ul>
+		);
+	}
+});
+
+var NavItem =  React.createClass({
+	render: function () {
+		var classes = cx({
+			"active": this.props.active
+		});
+		return (
+			<li className={classes}>
+				<a onClick={this.props.onClick} href="#">
+					<span className="badge pull-right">{this.props.count}</span> {this.props.children}
+				</a>
+			</li>
+		);
+	}
+});
+
+var ConfigPanel = React.createClass({
 	propTypes: {
-		cache: React.PropTypes.shape({
-			name: React.PropTypes.string,
-			keys: React.PropTypes.arrayOf(React.PropTypes.string),
-			config: React.PropTypes.object
-		})
-	},
-	
-	getInitialState: function () {
-		return {
-			viewKeys: false,
-			viewConfig: false
-		};
+		cache: cacheShape
 	},
 
 	render: function () {
-		return (
-			<tbody>
-				<tr>
-					<td>{this.props.cache.name}</td>
-					<td><span className="badge">{this.props.cache.keys.length}</span></td>
-					<td>{this.renderDeleteButton()}</td>
-					<td>{this.renderViewConfigButton()}</td>
-					<td>{this.renderViewKeysButton()}</td>
-				</tr>
-				{this.state.viewConfig && this.renderConfig()}
-				{this.state.viewKeys && this.renderKeys()}
-			</tbody>
-		);
-	},
-
-	renderDeleteButton: function () {
-		return <button onClick={this.handleDelete} disabled={!this.props.cache.keys.length} className="btn btn-danger btn-sm">Delete keys</button>;
-	},
-
-	renderViewConfigButton: function () {
-		return <button onClick={this.handleToggleViewConfig} className="btn btn-info btn-sm">{this.state.viewConfig ? 'Hide' : 'Show'} config</button>;
-	},
-
-	renderViewKeysButton: function () {
-		return <button onClick={this.handleToggleViewKeys} disabled={!this.props.cache.keys.length} className="btn btn-info btn-sm">{this.state.viewKeys ? 'Hide' : 'Show'} keys</button>;
-	},
-	
-	renderConfig: function () {
 		var config = {};
-		
+
 		for (var i in this.props.cache.config) {
-			config[i] = (
-				<tr>
-					<td>{i}</td>
-					<td>{this.props.cache.config[i]}</td>
-				</tr>
-			);
+			if (this.props.cache.config.hasOwnProperty(i)) {
+				config[i] = (
+					<tr>
+						<td>{i}</td>
+						<td>{this.props.cache.config[i]}</td>
+					</tr>
+				);
+			}
 		}
-		
+
 		return (
-			<tr>
-				<td colSpan="5">
-					<div className="panel panel-default">
-						<table className="table table-striped">
-							<tbody>{config}</tbody>
-						</table>
-					</div>
-				</td>
-			</tr>
+			<div className="panel panel-primary">
+				<div className="panel-heading">
+					<h3 className="panel-title">Config</h3>
+				</div>
+				<table className="table table-striped">
+					<thead>
+						<tr>
+							<th>Key</th>
+							<th>Value</th>
+						</tr>
+					</thead>
+					<tbody>{config}</tbody>
+				</table>
+			</div>
 		);
+	}
+});
+
+var KeysPanel = React.createClass({
+	propTypes: {
+		cache: cacheShape
 	},
 
-	renderKeys: function () {
+	render: function () {
 		var keys = this.props.cache.keys.map(function (key, i) {
 			return (
-				<li key={i}>{key}</li>
-				);
+				<li className="list-group-item" key={i}>{key}</li>
+			);
 		});
 		
 		return (
-			<tr>
-				<td colSpan="5">
-					<ul>{keys}</ul>
-				</td>
-			</tr>
+			<div className="panel panel-primary">
+				<div className="panel-heading clearfix">
+					<div className="btn-group pull-right">
+						<button
+							onClick={this.handleDelete}
+							disabled={!this.props.cache.keys.length}
+							className="btn btn-sm btn-danger"><span className="glyphicon glyphicon-remove"></span> Delete keys</button>
+					</div>
+					<h3 className="panel-title">Keys</h3>
+				</div>
+				<ul className="list-group">
+					{keys}
+				</ul>
+			</div>
 		);
 	},
 
 	handleDelete: function () {
 		ManagerCacheActionCreators.deleteCache(this.props.cache);
+	}
+});
+
+var Cache = React.createClass({
+	propTypes: {
+		cache: cacheShape
 	},
 
-	handleToggleViewConfig: function () {
-		this.setState({viewConfig: !this.state.viewConfig});
-	},
-
-	handleToggleViewKeys: function () {
-		this.setState({viewKeys: !this.state.viewKeys});
+	render: function () {
+		return (
+			<div>
+				<ConfigPanel cache={this.props.cache} />
+				<KeysPanel cache={this.props.cache} />
+			</div>
+		);
 	}
 });
 
 var Manager = React.createClass({
 	propTypes: {
-		initialCaches: React.PropTypes.arrayOf(React.PropTypes.object)
+		initialCaches: React.PropTypes.arrayOf(cacheShape)
 	},
-	
+
 	getInitialState: function () {
-		return getStateFromStores();
+		return {
+			activeCacheIndex: 0,
+			caches: getCachesFromStore()
+		};
 	},
 	
+	getActiveCache: function () {
+		return this.state.caches[this.state.activeCacheIndex];
+	},
+
 	componentDidMount: function () {
 		CacheStore.addChangeListener(this._onChange);
 
@@ -141,39 +167,60 @@ var Manager = React.createClass({
 	},
 
 	render: function () {
-		var caches = this.state.caches.map(function (cache, i) {
-			return <Cache key={i} cache={cache} />;
-		});
-
+		var navItems = this.state.caches.map(function (cache, i) {
+			return <NavItem
+				active={i === this.state.activeCacheIndex}
+				key={i}
+				count={cache.keys.length}
+				onClick={this.handleSelectedCacheChange.bind(this, i)}>
+				{cache.name}
+			</NavItem>;
+		}.bind(this));
+		
 		return (
 			<div>
-				<button onClick={this.handleDelete} className="btn btn-danger">Delete all</button>
-				<table className="table">
-					<thead>
-						<tr>
-							<th>Name</th>
-							<th>Keys</th>
-							<th>Delete</th>
-							<th>Config</th>
-							<th>Keys</th>
-						</tr>
-					</thead>
-					{caches}
-				</table>
+				<div className="page-header">
+					<button className="btn btn-danger pull-right" onClick={this.handleDelete} href="#">
+						<span className="glyphicon glyphicon-remove"></span> Delete all keys
+					</button>
+					<h1>
+						<span>Cache Manager</span> <small>by Heyday!</small>
+					</h1>
+				</div>
+				<div className="row">
+					<div className="col-md-4">
+						<Nav>
+							{navItems}
+						</Nav>
+					</div>
+					<div className="col-md-8">
+						{this.state.caches.length && <Cache cache={this.getActiveCache()} />}
+					</div>
+				</div>
 			</div>
 		);
 	},
 
+	handleSelectedCacheChange: function (index, e) {
+		e.preventDefault();
+		this.setState({
+			activeCacheIndex: index
+		});
+	},
+	
 	handleDelete: function () {
 		ManagerCacheActionCreators.deleteCaches(this.state.caches);
 	},
 
 	/**
-	 * Event handler for 'change' events coming from the MessageStore
+	 * Event handler for 'change' events coming from the CacheStore
 	 */
 	_onChange: function() {
-		this.setState(getStateFromStores());
+		this.setState({
+			caches: getCachesFromStore()
+		});
 	}
+	
 });
 
 module.exports = Manager;
