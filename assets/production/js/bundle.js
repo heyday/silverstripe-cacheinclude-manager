@@ -21798,6 +21798,8 @@ module.exports = function(arr, fn, initial){
   
   return curr;
 };
+},{}],"./source/js/Manager":[function(require,module,exports){
+module.exports=require('nsSFmD');
 },{}],"nsSFmD":[function(require,module,exports){
 /** @jsx React.DOM */
 
@@ -21809,7 +21811,6 @@ var ManagerServerActionCreators = require('./actionCreators/ManagerServerActionC
 var ManagerCacheActionCreators = require('./actionCreators/ManagerCacheActionCreators');
 var CacheStore = require('./stores/CacheStore');
 var ServerUpdatesAPI = require('./utils/ServerUpdatesAPI');
-
 
 var cacheShape = React.PropTypes.shape({
 	name: React.PropTypes.string,
@@ -21980,7 +21981,7 @@ var Manager = React.createClass({displayName: 'Manager',
 		}.bind(this));
 		
 		return (
-			React.DOM.div(null, 
+			React.DOM.div({className: "container"}, 
 				React.DOM.div({className: "page-header"}, 
 					React.DOM.button({className: "btn btn-danger pull-right", onClick: this.handleDelete, href: "#"}, 
 						React.DOM.span({className: "glyphicon glyphicon-remove"}), " Delete all keys"
@@ -22011,10 +22012,10 @@ var Manager = React.createClass({displayName: 'Manager',
 	},
 	
 	handleDelete: function () {
-		ManagerCacheActionCreators.deleteCaches( this.state.caches );
+		ManagerCacheActionCreators.deleteCaches(this.state.caches);
 	},
 
-		/**
+	/**
 	 * Event handler for 'change' events coming from the CacheStore
 	 */
 	_onChange: function() {
@@ -22026,9 +22027,7 @@ var Manager = React.createClass({displayName: 'Manager',
 });
 
 module.exports = Manager;
-},{"./actionCreators/ManagerCacheActionCreators":169,"./actionCreators/ManagerServerActionCreators":170,"./stores/CacheStore":174,"./utils/ServerUpdatesAPI":175,"react/addons":2}],"./source/js/Manager":[function(require,module,exports){
-module.exports=require('nsSFmD');
-},{}],168:[function(require,module,exports){
+},{"./actionCreators/ManagerCacheActionCreators":169,"./actionCreators/ManagerServerActionCreators":170,"./stores/CacheStore":174,"./utils/ServerUpdatesAPI":175,"react/addons":2}],168:[function(require,module,exports){
 var Dispatcher = require('./flux/Dispatcher');
 var copyProperties = require('react/lib/copyProperties');
 

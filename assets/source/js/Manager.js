@@ -178,7 +178,7 @@ var Manager = React.createClass({
 		}.bind(this));
 		
 		return (
-			<div>
+			<div className="container">
 				<div className="page-header">
 					<button className="btn btn-danger pull-right" onClick={this.handleDelete} href="#">
 						<span className="glyphicon glyphicon-remove"></span> Delete all keys

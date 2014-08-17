@@ -13,8 +13,6 @@
 	<script src="/silverstripe-cacheinclude-manager/assets/production/js/bundle.js"></script>
 </head>
 <body>
-	<div class="container">
-		$ManagerComponent
-	</div>
+	$ManagerComponent
 </body>
 </html>
