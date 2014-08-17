@@ -64,8 +64,7 @@ class ManagerController extends Controller
                     $this->cacheModel->getAll(),
                     new Transformers\CacheTransformer()
                 ))['data']
-            ],
-            'cacheinclude-manager'
+            ]
         );
     }
 
