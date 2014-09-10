@@ -58,10 +58,8 @@ EventEmitter.prototype.emit = function(type) {
       er = arguments[1];
       if (er instanceof Error) {
         throw er; // Unhandled 'error' event
-      } else {
-        throw TypeError('Uncaught, unspecified "error" event.');
       }
-      return false;
+      throw TypeError('Uncaught, unspecified "error" event.');
     }
   }
 
@@ -20494,12 +20492,6 @@ var KeysPanel = React.createClass({displayName: 'KeysPanel',
 	},
 
 	render: function () {
-		var keys = this.props.cache.keys.map(function (key, i) {
-			return (
-				React.DOM.li({className: "list-group-item", key: i}, key)
-			);
-		});
-
 		return (
 			React.DOM.div({className: "panel panel-primary"}, 
 				React.DOM.div({className: "panel-heading clearfix"}, 
@@ -20511,8 +20503,11 @@ var KeysPanel = React.createClass({displayName: 'KeysPanel',
 					), 
 					React.DOM.h3({className: "panel-title"}, "Keys")
 				), 
-				React.DOM.ul({className: "list-group"}, 
-					keys
+				React.DOM.table({className: "table table-striped"}, 
+					React.DOM.thead(null, 
+						React.DOM.tr(null, this.renderTableColumns())
+					), 
+					React.DOM.tbody(null, this.renderTableRows())
 				)
 			)
 		);
@@ -20520,6 +20515,60 @@ var KeysPanel = React.createClass({displayName: 'KeysPanel',
 
 	handleDelete: function () {
 		ManagerCacheActionCreators.deleteCache(this.props.cache);
+	},
+	
+	getColumns: function () {
+		var columns = [
+			'key'
+		];
+
+		this.props.cache.keys.forEach(function (key) {
+			if (typeof key.information !== 'object') {
+				return;
+			}
+
+			Object.keys(key.information).forEach(function (infoKey) {
+				if (columns.indexOf(infoKey) === -1) {
+					columns.push(infoKey);
+				}
+			});
+		});
+		
+		return columns;
+	},
+
+	renderTableColumns: function () {
+		return this.getColumns().map(function (column) {
+			return React.DOM.th(null, column);
+		});
+	},
+	
+	renderTableRows: function () {
+		var columns = this.getColumns();
+		
+		return this.props.cache.keys.map(function (key, i) {
+			var rowColumns = columns.map(function (column) {
+				return this.renderTableRowColumn(key, column);
+			}.bind(this));
+			return (
+				React.DOM.tr({key: i}, rowColumns)
+			);
+		}.bind(this));
+	},
+
+	renderTableRowColumn: function (key, column) {
+		var contents;
+		if (column === 'key') {
+			contents = key.key;
+		} else if (typeof key.information !== 'object' || !key.information[column]) {
+			contents = 'NA';
+		} else if (column === 'url') {
+			contents = React.DOM.a({href: key.information[column], target: "_blank"}, key.information[column]);
+		} else {
+			contents = information[type];
+		}
+		
+		return React.DOM.td(null, contents);
 	}
 });
 
@@ -20890,9 +20939,17 @@ module.exports = invariant;
 
 var React = require('react');
 
+var keyShape = React.PropTypes.shape({
+	key: React.PropTypes.string,
+	information: React.PropTypes.oneOfType([
+		React.PropTypes.bool,
+		React.PropTypes.object
+	])
+});
+
 var cacheShape = React.PropTypes.shape({
 	name: React.PropTypes.string,
-	keys: React.PropTypes.arrayOf(React.PropTypes.string),
+	keys: React.PropTypes.arrayOf(keyShape),
 	config: React.PropTypes.object
 });
 
