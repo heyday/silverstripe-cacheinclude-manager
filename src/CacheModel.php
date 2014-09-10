@@ -49,7 +49,7 @@ class CacheModel
     {
         $caches = [];
 
-        foreach ($this->getKeys($name) as $key) {
+        foreach ($this->getKeys($name) as $key => $information) {
             $caches[] = $this->getByKey($name, $key);
         }
 
@@ -79,16 +79,8 @@ class CacheModel
     public function getKeys($name)
     {
         $this->assertHasName($name);
-
-        $keys = [];
-
-        foreach ((array) $this->cache->fetch($name) as $key => $value) {
-            if ($value) {
-                $keys[] = $key;
-            }
-        }
         
-        return $keys;
+        return (array) $this->cache->fetch($name);
     }
     
     public function delete($name)

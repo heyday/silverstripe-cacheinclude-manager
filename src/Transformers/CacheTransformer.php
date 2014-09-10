@@ -13,7 +13,14 @@ class CacheTransformer extends TransformerAbstract
         $config = $cache['config'];
 
         $item['name'] = $cache['name'];
-        $item['keys'] = $cache['keys'];
+        $item['keys'] = [];
+        
+        foreach ($cache['keys'] as $key => $information) {
+            $item['keys'][] = [
+                'key' => $key,
+                'information' => $information
+            ];
+        }
 
         $item['config'] = [];
 
