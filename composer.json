@@ -13,7 +13,7 @@
 	},
 	"require": {
 		"composer/installers": "~1.0",
-		"heyday/silverstripe-cacheinclude": "~4.0",
+		"heyday/silverstripe-cacheinclude": "~4.1.1",
 		"league/fractal": "~0.9.1",
 		"camspiers/reactjs-php-render": "~0.1.0"
 	},

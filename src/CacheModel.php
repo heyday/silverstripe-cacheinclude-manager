@@ -37,7 +37,7 @@ class CacheModel
                 'config' => $config
             ];
         }
-        
+
         return $caches;
     }
 
@@ -79,19 +79,31 @@ class CacheModel
     public function getKeys($name)
     {
         $this->assertHasName($name);
-        
+
         return (array) $this->cache->fetch($name);
     }
-    
+
     public function delete($name)
     {
+        $cacheInclude = new CacheInclude($this->cache,$this->config);
         $this->assertHasName($name);
-
-        $keys = (array) $this->cache->fetch($name);
-        foreach (array_keys($keys) as $key) {
-            $this->cache->delete($key);
+        $limit = 20;
+        while ($cacheInclude->checkLockForName($name)){
+          sleep(1);
+          $limit--;
+          if($limit <= 0){
+            break;
+          }
         }
-        $this->cache->save($name, []);
+        if(!($limit <=  0)){
+          $cacheInclude->createLockForName($name);
+          $keys = (array) $this->cache->fetch($name);
+          foreach (array_keys($keys) as $key) {
+            $this->cache->delete($key);
+          }
+          $this->cache->save($name, []);
+          $cacheInclude->releaseLockForName($name);
+        }
     }
 
     /**
